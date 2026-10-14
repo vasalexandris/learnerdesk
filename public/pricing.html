@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="el"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/app.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="/assets/config.js"></script><script src="/assets/i18n.js"></script><script src="/assets/app.js"></script>
+<title>LearnerDesk — Τιμές</title>
+</head><body>
+<div id="site-header"></div>
+<main class="wrap">
+  <h2 data-i18n="pricing_title"></h2>
+  <label class="row" style="margin:12px 0"><input type="checkbox" id="annual"> <span data-i18n="annual_toggle"></span></label>
+  <div class="grid3" id="plans"></div>
+  <h3 data-i18n="topups" style="margin:28px 0 10px"></h3>
+  <div class="grid3" id="topups"></div>
+  <div id="msg"></div>
+</main>
+<script>
+LD.renderHeader('pricing');
+let data, me = null;
+const eur = c => (c / 100).toLocaleString(LD.lang === 'en' ? 'en-IE' : 'el-GR', { style: 'currency', currency: 'EUR' });
+function render() {
+  const annual = document.getElementById('annual').checked;
+  const limits = p => `<ul class="clean"><li>${LD.t('plan_limits', { pages: p.max_pages_per_pdf, pdfs: p.pdfs_per_month, credits: p.credits_per_day })}</li><li>${p.ocr ? LD.t('ocr_yes') : LD.t('ocr_no')}</li></ul>`;
+  const cur = me ? me.plan.key : null;
+  let html = `<div class="card plan ${cur === 'free' ? 'current' : ''}"><h3>Free</h3><div class="price">${LD.t('free_forever')}</div>${limits(data.plans.free)}${cur === 'free' ? `<span class="muted">${LD.t('current')}</span>` : ''}</div>`;
+  for (const key of ['student', 'pro']) {
+    const id = key + (annual ? '_annual' : '_monthly'), item = data.items[id];
+    html += `<div class="card plan ${cur === key ? 'current' : ''}"><h3>${data.plans[key].name}</h3>
+      <div class="price">${eur(item.amount_cents)}<small>${annual ? LD.t('per_year') : LD.t('per_month')}</small></div>${limits(data.plans[key])}
+      ${cur === key ? `<p class="muted">${LD.t('current')}</p>` : ''}
+      <button class="btn red" data-buy="${id}">${me ? LD.t('buy') : LD.t('pricing_login')}</button></div>`;
+  }
+  document.getElementById('plans').innerHTML = html;
+  document.getElementById('topups').innerHTML = Object.entries(data.items).filter(([, i]) => i.kind === 'topup').map(([id, i]) =>
+    `<div class="card"><h3>${i.credits} credits</h3><div class="price">${eur(i.amount_cents)}</div><button class="btn" data-buy="${id}" style="margin-top:10px">${me ? LD.t('buy') : LD.t('pricing_login')}</button></div>`).join('');
+  document.querySelectorAll('[data-buy]').forEach(b => b.onclick = () => buy(b.dataset.buy, b));
+}
+async function buy(itemId, btn) {
+  if (!me) { location.href = '/auth?next=/pricing'; return; }
+  btn.disabled = true;
+  try {
+    const { checkoutUrl } = await LD.api('/payments/create-order', { method: 'POST', body: { item_id: itemId, lang: LD.lang } });
+    location.href = checkoutUrl;
+  } catch (e) {
+    document.getElementById('msg').innerHTML = `<div class="msg err">${LD.esc(LD.errText(e))}</div>`;
+    btn.disabled = false;
+  }
+}
+(async () => {
+  data = await LD.api('/plans');
+  try { if (await LD.getSession()) me = await LD.api('/me'); } catch {}
+  document.getElementById('annual').onchange = render;
+  render();
+})();
+</script></body></html>

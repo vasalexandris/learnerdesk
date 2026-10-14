@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="el"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/app.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="/assets/config.js"></script><script src="/assets/i18n.js"></script><script src="/assets/app.js"></script>
+<title>LearnerDesk — Πίνακας</title>
+</head><body>
+<div id="site-header"></div>
+<main class="wrap">
+  <h2 data-i18n="dash_title" style="margin-bottom:16px"></h2>
+  <div class="grid3" id="top"></div>
+  <div class="row" style="justify-content:space-between;margin:28px 0 10px">
+    <h3 data-i18n="dash_sets"></h3>
+    <a class="btn red" href="/study" data-i18n="dash_new"></a>
+  </div>
+  <div class="card" id="sets"></div>
+</main>
+<script>
+LD.renderHeader('dashboard');
+(async () => {
+  await LD.requireSession();
+  const me = await LD.api('/me');
+  const c = me.credits, p = me.plan;
+  const pct = c.daily_limit ? Math.min(100, Math.round(c.daily_used / c.daily_limit * 100)) : 0;
+  document.getElementById('top').innerHTML = `
+    <div class="card"><div class="muted" data-i18n="dash_plan"></div><div class="price">${LD.esc(p.name)}</div>
+      <p class="muted">${LD.t('plan_limits', { pages: p.max_pages_per_pdf, pdfs: p.pdfs_per_month, credits: c.daily_limit })} · ${p.ocr ? LD.t('ocr_yes') : LD.t('ocr_no')}</p>
+      ${p.period_end ? `<p class="muted">→ ${new Date(p.period_end).toLocaleDateString(LD.lang)}</p>` : ''}
+      <a class="btn" style="margin-top:10px" href="/pricing" data-i18n="dash_upgrade"></a></div>
+    <div class="card"><div class="muted" data-i18n="dash_credits"></div><div class="price">${c.daily_left}<small> / ${c.daily_limit}</small></div><div class="bar"><i style="width:${pct}%"></i></div></div>
+    <div class="card"><div class="muted" data-i18n="dash_topup"></div><div class="price">${c.topup}</div></div>`;
+  LD.applyI18n(document.getElementById('top'));
+  loadSets();
+})();
+async function loadSets() {
+  const { sets } = await LD.api('/study/sets');
+  const box = document.getElementById('sets');
+  if (!sets.length) { box.innerHTML = `<p class="muted">${LD.t('dash_none')}</p>`; return; }
+  box.innerHTML = `<table class="list"><tbody>${sets.map(s => `<tr>
+    <td><strong>${LD.esc(s.title)}</strong><div class="muted">${LD.esc(s.source_name || '')} · ${s.page_from}–${s.page_to} · ${new Date(s.created_at).toLocaleDateString(LD.lang)}</div></td>
+    <td style="text-align:right;white-space:nowrap"><a class="btn" href="/study?set=${encodeURIComponent(s.id)}">${LD.t('dash_open')}</a>
+    <button class="btn ghost" data-del="${LD.esc(s.id)}">${LD.t('dash_delete')}</button></td></tr>`).join('')}</tbody></table>`;
+  box.querySelectorAll('[data-del]').forEach(b => b.onclick = async () => {
+    if (!confirm(LD.t('dash_confirm_delete'))) return;
+    await LD.api('/study/sets/' + b.dataset.del, { method: 'DELETE' });
+    loadSets();
+  });
+}
+</script></body></html>

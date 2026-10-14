@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="el"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/app.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="/assets/config.js"></script><script src="/assets/i18n.js"></script><script src="/assets/app.js"></script>
+<title>LearnerDesk — Σύνδεση</title>
+</head><body>
+<div id="site-header"></div>
+<main class="wrap" style="max-width:420px">
+  <div class="card">
+    <h3 data-i18n="auth_title"></h3>
+    <form id="f" style="margin-top:14px">
+      <label class="field"><span data-i18n="email"></span><input type="email" id="email" required autocomplete="email"></label>
+      <label class="field"><span data-i18n="password"></span><input type="password" id="pw" minlength="8" autocomplete="current-password"></label>
+      <div class="row">
+        <button class="btn" id="login" type="submit" data-i18n="login"></button>
+        <button class="btn ghost" id="signup" type="button" data-i18n="signup"></button>
+      </div>
+      <p style="margin-top:12px"><a href="#" id="forgot" data-i18n="forgot"></a></p>
+    </form>
+    <div id="msg"></div>
+  </div>
+</main>
+<script>
+LD.renderHeader('login');
+const $ = id => document.getElementById(id);
+const show = (txt, ok) => { $('msg').innerHTML = `<div class="msg ${ok ? 'ok' : 'err'}">${LD.esc(txt)}</div>`; };
+const next = () => { const n = new URLSearchParams(location.search).get('next'); return n && n.startsWith('/') && !n.startsWith('//') ? n : '/dashboard'; };
+LD.getSession().then(s => { if (s) location.href = next(); });
+$('f').onsubmit = async e => {
+  e.preventDefault();
+  const { error } = await LD.sb.auth.signInWithPassword({ email: $('email').value, password: $('pw').value });
+  if (error) show(error.message, false); else location.href = next();
+};
+$('signup').onclick = async () => {
+  if (!$('email').value || $('pw').value.length < 8) return show(LD.t('auth_error'), false);
+  const { error } = await LD.sb.auth.signUp({ email: $('email').value, password: $('pw').value, options: { emailRedirectTo: location.origin + '/dashboard' } });
+  if (error) show(error.message, false); else show(LD.t('auth_check_mail'), true);
+};
+$('forgot').onclick = async e => {
+  e.preventDefault();
+  if (!$('email').value) return;
+  const { error } = await LD.sb.auth.resetPasswordForEmail($('email').value, { redirectTo: location.origin + '/auth' });
+  if (error) show(error.message, false); else show(LD.t('auth_reset_sent'), true);
+};
+</script></body></html>

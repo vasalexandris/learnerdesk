@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="el"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/app.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="/assets/config.js"></script><script src="/assets/i18n.js"></script><script src="/assets/app.js"></script>
+<title>LearnerDesk — Πληρωμή</title>
+</head><body>
+<div id="site-header"></div>
+<main class="wrap" style="max-width:520px;text-align:center">
+  <div class="card"><div id="out"><span class="spin"></span> <span data-i18n="pay_wait"></span></div>
+  <p style="margin-top:16px"><a class="btn" href="/dashboard" data-i18n="pay_back"></a></p></div>
+</main>
+<script>
+LD.renderHeader('');
+// Η Viva επιστρέφει εδώ με ?t=<transactionId>&s=<orderCode> (ορίζεται στο Success URL του payment source).
+(async () => {
+  await LD.requireSession();
+  const q = new URLSearchParams(location.search), order = q.get('s'), tx = q.get('t');
+  const out = document.getElementById('out');
+  if (!order) { out.textContent = LD.t('pay_failed'); return; }
+  for (let i = 0; i < 10; i++) {
+    try {
+      const r = await LD.api('/payments/status/' + encodeURIComponent(order) + (tx ? '?tx=' + encodeURIComponent(tx) : ''));
+      if (r.status === 'paid') { out.innerHTML = `<div class="msg ok">${LD.t('pay_ok')}</div>`; return; }
+      if (r.status === 'failed') { out.innerHTML = `<div class="msg err">${LD.t('pay_failed')}</div>`; return; }
+    } catch {}
+    await new Promise(r => setTimeout(r, 2000));
+  }
+  out.innerHTML = `<div class="msg err">${LD.t('pay_pending')}</div>`;
+})();
+</script></body></html>
