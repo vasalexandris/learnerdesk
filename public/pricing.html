@@ -2,9 +2,9 @@
 <html lang="el"><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/app.css">
+<link rel="stylesheet" href="./assets/app.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="/assets/config.js"></script><script src="/assets/i18n.js"></script><script src="/assets/app.js"></script>
+<script src="./assets/config.js"></script><script src="./assets/i18n.js"></script><script src="./assets/app.js"></script>
 <title>LearnerDesk — Τιμές</title>
 </head><body>
 <div id="site-header"></div>
@@ -38,7 +38,7 @@ function render() {
   document.querySelectorAll('[data-buy]').forEach(b => b.onclick = () => buy(b.dataset.buy, b));
 }
 async function buy(itemId, btn) {
-  if (!me) { location.href = '/auth?next=/pricing'; return; }
+  if (!me) { location.href = LD.pageUrl('auth') + '?next=' + encodeURIComponent(location.pathname); return; }
   btn.disabled = true;
   try {
     const { checkoutUrl } = await LD.api('/payments/create-order', { method: 'POST', body: { item_id: itemId, lang: LD.lang } });
@@ -49,7 +49,22 @@ async function buy(itemId, btn) {
   }
 }
 (async () => {
-  data = await LD.api('/plans');
+  try { data = await LD.api('/plans'); }
+  catch {
+    data = {
+      plans: {
+        free: { name: 'Free', credits_per_day: 15, max_pages_per_pdf: 20, pdfs_per_month: 2, ocr: false },
+        student: { name: 'Student', credits_per_day: 80, max_pages_per_pdf: 60, pdfs_per_month: 30, ocr: true },
+        pro: { name: 'Pro', credits_per_day: 400, max_pages_per_pdf: 200, pdfs_per_month: 300, ocr: true }
+      },
+      items: {
+        student_monthly: { amount_cents: 490 }, student_annual: { amount_cents: 4900 },
+        pro_monthly: { amount_cents: 1290 }, pro_annual: { amount_cents: 12900 },
+        topup_small: { kind: 'topup', credits: 150, amount_cents: 290 },
+        topup_large: { kind: 'topup', credits: 600, amount_cents: 890 }
+      }
+    };
+  }
   try { if (await LD.getSession()) me = await LD.api('/me'); } catch {}
   document.getElementById('annual').onchange = render;
   render();

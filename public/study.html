@@ -3,19 +3,19 @@
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>LearnerDesk — Μελέτη</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/app.css"><link rel="stylesheet" href="/assets/study.css">
+<link rel="stylesheet" href="./assets/app.css"><link rel="stylesheet" href="./assets/study.css">
 <script>MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']] } };</script>
 <script async src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script src="/assets/config.js"></script><script src="/assets/i18n.js"></script><script src="/assets/app.js"></script>
+<script src="./assets/config.js"></script><script src="./assets/i18n.js"></script><script src="./assets/app.js"></script>
 </head>
 <body class="study">
 <div id="site-header"></div>
 <div class="container">
   <div class="left-panel">
     <div class="pdf-container" id="pdfContainer">
-      <div class="upload-placeholder" id="placeholder"><div style="font-size:50px">📄</div><p id="placeholderTxt" data-i18n="st_placeholder"></p></div>
+      <div class="upload-placeholder" id="placeholder"><div style="font-size:50px">📄</div><p id="placeholderTxt" data-i18n="st_placeholder">Φόρτωσε το PDF σου για να το βλέπεις εδώ</p></div>
       <iframe id="pdfViewer" style="display:none" title="PDF"></iframe>
     </div>
   </div>
@@ -23,19 +23,29 @@
     <!-- Προβολή 1: νέο σετ -->
     <div class="new-view" id="viewNew">
       <div class="card">
-        <h3 data-i18n="st_upload_title"></h3>
-        <label class="field" style="margin-top:12px"><span data-i18n="st_choose"></span><input type="file" id="pdfFile" accept="application/pdf"></label>
+        <h3 data-i18n="st_upload_title">Νέο σετ μελέτης</h3>
+        <label class="field" style="margin-top:12px"><span data-i18n="st_choose">Επίλεξε PDF</span><input type="file" id="pdfFile" accept="application/pdf"></label>
         <div class="row">
-          <label class="field" style="flex:1"><span data-i18n="st_from"></span><input type="number" id="pFrom" min="1" value="1"></label>
-          <label class="field" style="flex:1"><span data-i18n="st_to"></span><input type="number" id="pTo" min="1" value="1"></label>
+          <label class="field" style="flex:1"><span data-i18n="st_from">Από σελίδα</span><input type="number" id="pFrom" min="1" value="1"></label>
+          <label class="field" style="flex:1"><span data-i18n="st_to">Μέχρι σελίδα</span><input type="number" id="pTo" min="1" value="1"></label>
         </div>
-        <label class="row" style="margin-bottom:8px"><input type="checkbox" id="ocr"> <span id="ocrLbl" data-i18n="st_ocr"></span></label>
+        <label class="row" style="margin-bottom:8px"><input type="checkbox" id="ocr"> <span id="ocrLbl" data-i18n="st_ocr">Σκαναρισμένο PDF (OCR)</span></label>
+        
+        <div id="apiKeyPrompt" style="margin:12px 0;padding:12px;background:#f8fafc;border:1px solid #cbd5e1;border-radius:8px;">
+          <div style="font-size:13px;font-weight:600;margin-bottom:6px;color:#334155;">🔑 Gemini API Key (για άμεση επεξεργασία στον browser):</div>
+          <div style="display:flex;gap:8px;">
+            <input type="password" id="geminiKeyIn" placeholder="AIzaSy..." style="flex:1;padding:8px;font-size:13px;">
+            <button type="button" class="btn" id="saveKeyBtn" style="padding:8px 14px;font-size:13px;">Αποθήκευση</button>
+          </div>
+          <p class="muted" style="font-size:12px;margin-top:4px;">Αποθηκεύεται μόνο τοπικά στον browser σου. Αν τρέχεις το τοπικό gateway (`localhost:8080`), διαβάζεται αυτόματα από το `.env`.</p>
+        </div>
+
         <p class="muted" id="limitTxt"></p>
         <p class="muted" id="costTxt"></p>
-        <div class="row" style="margin-top:12px"><button class="btn red" id="genBtn" disabled data-i18n="st_generate"></button><span id="genStatus"></span></div>
+        <div class="row" style="margin-top:12px"><button class="btn red" id="genBtn" disabled data-i18n="st_generate">Δημιουργία</button><span id="genStatus"></span></div>
         <div id="genMsg"></div>
       </div>
-      <div class="card"><h3 data-i18n="st_my_sets"></h3><div id="setList"></div></div>
+      <div class="card"><h3 data-i18n="st_my_sets">Τα σετ μου</h3><div id="setList"></div></div>
     </div>
     <!-- Προβολή 2: περιβάλλον μελέτης -->
     <div id="viewSet" style="display:none;flex:1;min-height:0;flex-direction:column">
@@ -43,15 +53,15 @@
         <button class="mode-btn" id="btnNew">＋</button>
         <span id="setTitle" style="font-weight:700;margin:0 8px"></span>
         <span style="width:2px;height:22px;background:#ddd"></span>
-        <button class="mode-btn active" data-mode="study" data-i18n="m_study"></button>
-        <button class="mode-btn" data-mode="tf" data-i18n="m_tf"></button>
-        <button class="mode-btn" data-mode="mcq" data-i18n="m_mcq"></button>
-        <button class="mode-btn" data-mode="fill" data-i18n="m_fill"></button>
-        <button class="mode-btn" data-mode="cloze" data-i18n="m_cloze"></button>
-        <button class="mode-btn" data-mode="free" data-i18n="m_free"></button>
+        <button class="mode-btn active" data-mode="study" data-i18n="m_study">📖 Μελέτη</button>
+        <button class="mode-btn" data-mode="tf" data-i18n="m_tf">✔️❌ Σωστό/Λάθος</button>
+        <button class="mode-btn" data-mode="mcq" data-i18n="m_mcq">🔘 Πολλαπλής</button>
+        <button class="mode-btn" data-mode="fill" data-i18n="m_fill">🧩 Σύνθεση</button>
+        <button class="mode-btn" data-mode="cloze" data-i18n="m_cloze">📝 Κενά Θεωρίας</button>
+        <button class="mode-btn" data-mode="free" data-i18n="m_free">✍️ Ελεύθερη (AI)</button>
       </div>
       <div class="scroll-viewport"><div class="scroll-content">
-        <div class="col-headers-row"><div class="col-header-title" data-i18n="col_theory"></div><div class="col-header-title" data-i18n="col_ex"></div><div class="col-header-title" data-i18n="col_eval"></div></div>
+        <div class="col-headers-row"><div class="col-header-title" data-i18n="col_theory">Θεωρία / Έννοιες</div><div class="col-header-title" data-i18n="col_ex">Ερωτήσεις / Εξάσκηση</div><div class="col-header-title" data-i18n="col_eval">Αξιολόγηση</div></div>
         <div class="content-area" id="content-area"></div>
       </div></div>
     </div>
@@ -59,12 +69,12 @@
 </div>
 <div class="global-footer">
   <div class="footer-left"><strong id="footTitle">📄 LearnerDesk</strong>
-    <label for="pdfLoad" class="upload-btn" data-i18n="st_load_pdf"></label><input type="file" id="pdfLoad" accept="application/pdf" style="display:none"></div>
+    <label for="pdfLoad" class="upload-btn" data-i18n="st_load_pdf">Φόρτωση PDF</label><input type="file" id="pdfLoad" accept="application/pdf" style="display:none"></div>
   <div class="footer-right">
     <label for="audioUpload" class="upload-btn" id="audioLbl">🎵 Audio</label><input type="file" id="audioUpload" accept="audio/*" style="display:none">
     <button id="playPauseBtn" class="audio-btn" style="display:none">▶️</button><button id="rewindBtn" class="audio-btn" style="display:none">⏪ 10s</button><button id="forwardBtn" class="audio-btn" style="display:none">10s ⏩</button>
   </div>
 </div>
 <audio id="audioPlayer" style="display:none"></audio>
-<script src="/assets/study.js"></script>
+<script src="./assets/study.js"></script>
 </body></html>
