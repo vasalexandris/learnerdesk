@@ -2,6 +2,9 @@ import { supabase } from './config.js';
 import { PLANS } from './plans.js';
 
 export async function getPlan(userId) {
+  if (!supabase) {
+    return { key: 'dev', name: 'Δοκιμαστικό Πλάνο (10 σελίδες)', credits_per_day: 100, max_pages_per_pdf: 10, pdfs_per_month: 100, ocr: true, audio: true, billing: null, period_end: null };
+  }
   const { data } = await supabase.from('subscriptions').select('*').eq('user_id', userId).maybeSingle();
   const active = data && data.status === 'active' && (!data.current_period_end || new Date(data.current_period_end) > new Date());
   const key = active && PLANS[data.plan] ? data.plan : 'free';
@@ -9,6 +12,9 @@ export async function getPlan(userId) {
 }
 
 export async function getCredits(userId, plan) {
+  if (!supabase) {
+    return { daily_limit: plan.credits_per_day, daily_used: 0, daily_left: plan.credits_per_day, topup: 50 };
+  }
   const day = new Date().toISOString().slice(0, 10);
   const [{ data: usage }, { data: topups }] = await Promise.all([
     supabase.from('daily_credit_usage').select('used').eq('user_id', userId).eq('day', day).maybeSingle(),
@@ -21,16 +27,20 @@ export async function getCredits(userId, plan) {
 
 // Αφαιρεί credits ατομικά. Επιστρέφει { ok, receipt } — receipt για πιθανή επιστροφή.
 export async function consume(userId, plan, amount) {
+  if (!supabase) {
+    return { ok: true, receipt: { ok: true } };
+  }
   const { data, error } = await supabase.rpc('consume_credits', { p_user: userId, p_amount: amount, p_daily_limit: plan.credits_per_day });
   if (error) throw error;
   return { ok: data.ok, receipt: data };
 }
 
 export async function refund(userId, receipt) {
-  if (!receipt?.ok) return;
+  if (!supabase || !receipt?.ok) return;
   await supabase.rpc('refund_credits', { p_user: userId, p_from_daily: receipt.from_daily || 0, p_from_topup: receipt.from_topup || 0 });
 }
 
 export async function logUsage(row) {
+  if (!supabase) return;
   try { await supabase.from('api_usage').insert(row); } catch { /* το logging δεν πρέπει να σπάει το αίτημα */ }
 }

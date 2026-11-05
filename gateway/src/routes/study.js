@@ -10,11 +10,14 @@ import { generateStudySet, gradeFreeAnswer } from '../gemini.js';
 import { normalizeStudySet } from '../normalize.js';
 
 const r = Router();
-const aiLimiter = rateLimit({ windowMs: 60_000, limit: 6, standardHeaders: true, legacyHeaders: false, keyGenerator: req => req.user?.id || req.ip });
+const aiLimiter = rateLimit({ windowMs: 60_000, limit: 10, standardHeaders: true, legacyHeaders: false, keyGenerator: req => req.user?.id || req.ip });
 const gradeLimiter = rateLimit({ windowMs: 60_000, limit: 30, standardHeaders: true, legacyHeaders: false, keyGenerator: req => req.user?.id || req.ip });
 const bigJson = express.json({ limit: '20mb' });
 
 const monthStart = () => { const d = new Date(); return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1)).toISOString(); };
+
+// In-memory αποθήκη για Dev Mode (όταν δεν είναι συνδεδεμένο το Supabase)
+const devSets = new Map();
 
 // POST /api/study/generate  { pdf_base64, filename, page_from, page_to, ocr }
 r.post('/study/generate', requireUser, aiLimiter, bigJson, async (req, res) => {
@@ -36,13 +39,15 @@ r.post('/study/generate', requireUser, aiLimiter, bigJson, async (req, res) => {
   const pages = to - from + 1;
   if (pages > plan.max_pages_per_pdf) return res.status(403).json({ error: 'too_many_pages', max_pages: plan.max_pages_per_pdf, plan: plan.key });
 
-  const { count } = await supabase.from('api_usage').select('id', { count: 'exact', head: true })
-    .eq('user_id', req.user.id).eq('kind', 'generate').eq('ok', true).gte('created_at', monthStart());
-  if ((count || 0) >= plan.pdfs_per_month) return res.status(403).json({ error: 'monthly_limit', limit: plan.pdfs_per_month, plan: plan.key });
+  if (supabase) {
+    const { count } = await supabase.from('api_usage').select('id', { count: 'exact', head: true })
+      .eq('user_id', req.user.id).eq('kind', 'generate').eq('ok', true).gte('created_at', monthStart());
+    if ((count || 0) >= plan.pdfs_per_month) return res.status(403).json({ error: 'monthly_limit', limit: plan.pdfs_per_month, plan: plan.key });
+  }
 
   const cost = generateCost(pages, !!ocr);
   const paid = await consume(req.user.id, plan, cost);
-  if (!paid.ok) return res.status(402).json({ error: 'insufficient_credits', needed: cost, daily_left: paid.receipt.daily_left });
+  if (!paid.ok) return res.status(402).json({ error: 'insufficient_credits', needed: cost, daily_left: paid.receipt?.daily_left });
 
   try {
     // Στέλνουμε στο AI μόνο τις επιλεγμένες σελίδες.
@@ -56,13 +61,23 @@ r.post('/study/generate', requireUser, aiLimiter, bigJson, async (req, res) => {
     if (!set.sections.length) throw Object.assign(new Error('empty_result'), { status: 502 });
 
     const title = set.title || filename.replace(/\.pdf$/i, '');
-    const { data, error } = await supabase.from('study_sets').insert({
-      user_id: req.user.id, title, source_name: filename, page_from: from, page_to: to, lang: set.lang, data: { sections: set.sections },
-    }).select('id').single();
-    if (error) throw error;
+    let setId;
+
+    if (!supabase) {
+      setId = 'dev_' + Date.now();
+      devSets.set(setId, {
+        id: setId, user_id: req.user.id, title, source_name: filename, page_from: from, page_to: to, lang: set.lang, data: { sections: set.sections }, created_at: new Date().toISOString()
+      });
+    } else {
+      const { data, error } = await supabase.from('study_sets').insert({
+        user_id: req.user.id, title, source_name: filename, page_from: from, page_to: to, lang: set.lang, data: { sections: set.sections },
+      }).select('id').single();
+      if (error) throw error;
+      setId = data.id;
+    }
 
     await logUsage({ user_id: req.user.id, kind: 'generate', model: process.env.GEMINI_MODEL || 'gemini-2.5-flash', pages, credits: cost, input_tokens: ai.input_tokens, output_tokens: ai.output_tokens, ok: true });
-    res.json({ id: data.id, title, lang: set.lang, page_from: from, page_to: to, sections: set.sections, credits_charged: cost });
+    res.json({ id: setId, title, lang: set.lang, page_from: from, page_to: to, sections: set.sections, credits_charged: cost });
   } catch (e) {
     await refund(req.user.id, paid.receipt);
     await logUsage({ user_id: req.user.id, kind: 'generate', pages, credits: 0, ok: false });
@@ -72,6 +87,12 @@ r.post('/study/generate', requireUser, aiLimiter, bigJson, async (req, res) => {
 });
 
 r.get('/study/sets', requireUser, async (req, res) => {
+  if (!supabase) {
+    const sets = Array.from(devSets.values()).map(s => ({
+      id: s.id, title: s.title, source_name: s.source_name, page_from: s.page_from, page_to: s.page_to, lang: s.lang, created_at: s.created_at
+    })).reverse();
+    return res.json({ sets });
+  }
   const { data, error } = await supabase.from('study_sets').select('id,title,source_name,page_from,page_to,lang,created_at')
     .eq('user_id', req.user.id).order('created_at', { ascending: false }).limit(100);
   if (error) return res.status(500).json({ error: 'db_error' });
@@ -79,23 +100,39 @@ r.get('/study/sets', requireUser, async (req, res) => {
 });
 
 r.get('/study/sets/:id', requireUser, async (req, res) => {
+  if (!supabase) {
+    const data = devSets.get(req.params.id);
+    if (!data) return res.status(404).json({ error: 'not_found' });
+    return res.json({ id: data.id, title: data.title, lang: data.lang, page_from: data.page_from, page_to: data.page_to, sections: data.data.sections });
+  }
   const { data } = await supabase.from('study_sets').select('*').eq('id', req.params.id).eq('user_id', req.user.id).maybeSingle();
   if (!data) return res.status(404).json({ error: 'not_found' });
   res.json({ id: data.id, title: data.title, lang: data.lang, page_from: data.page_from, page_to: data.page_to, sections: data.data.sections });
 });
 
 r.delete('/study/sets/:id', requireUser, async (req, res) => {
+  if (!supabase) {
+    devSets.delete(req.params.id);
+    return res.json({ ok: true });
+  }
   await supabase.from('study_sets').delete().eq('id', req.params.id).eq('user_id', req.user.id);
   res.json({ ok: true });
 });
 
-// POST /api/study/grade { set_id, section_id, q_index, answer } — η σωστή απάντηση διαβάζεται από τη βάση, όχι από τον client.
+// POST /api/study/grade { set_id, section_id, q_index, answer }
 r.post('/study/grade', requireUser, gradeLimiter, express.json({ limit: '50kb' }), async (req, res) => {
   const { set_id, section_id, q_index, answer } = req.body || {};
   const student = String(answer || '').trim().slice(0, 4000);
   if (!student) return res.status(400).json({ error: 'empty_answer' });
-  const { data } = await supabase.from('study_sets').select('data').eq('id', set_id).eq('user_id', req.user.id).maybeSingle();
-  const q = data?.data?.sections?.find(s => s.id === section_id)?.questions?.free?.[q_index];
+
+  let q;
+  if (!supabase) {
+    const data = devSets.get(set_id);
+    q = data?.data?.sections?.find(s => s.id === section_id)?.questions?.free?.[q_index];
+  } else {
+    const { data } = await supabase.from('study_sets').select('data').eq('id', set_id).eq('user_id', req.user.id).maybeSingle();
+    q = data?.data?.sections?.find(s => s.id === section_id)?.questions?.free?.[q_index];
+  }
   if (!q) return res.status(404).json({ error: 'not_found' });
 
   const plan = await getPlan(req.user.id);

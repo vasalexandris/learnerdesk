@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LearnerDesk — Live Demo</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./assets/app.css">
+  <link rel="stylesheet" href="./assets/study.css">
+  <script>
+    MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']] } };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js"></script>
+  <script src="./assets/config.js"></script>
+  <script src="./assets/i18n.js"></script>
+  <script src="./assets/app.js"></script>
+  <style>
+    .demo-banner {
+      background: linear-gradient(135deg, #1e293b, #0f172a);
+      color: #fff;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      border-bottom: 2px solid #334155;
+    }
+    .demo-pill {
+      background: #ef4444;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .pdf-reader-box {
+      padding: 24px;
+      background: #fff;
+      height: 100%;
+      overflow-y: auto;
+      font-size: 14px;
+      line-height: 1.7;
+      color: #1e293b;
+    }
+    .pdf-header-tag {
+      font-size: 12px;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 6px;
+    }
+    .code-box {
+      background: #0f172a;
+      color: #38bdf8;
+      padding: 12px;
+      border-radius: 6px;
+      font-family: monospace;
+      font-size: 13px;
+      margin: 10px 0;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body class="study">
+  <div id="site-header"></div>
+
+  <div class="demo-banner">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span class="demo-pill">LIVE DEMO</span>
+      <span style="font-size:14px;font-weight:500;">
+        Προφορτωμένο Μάθημα: <strong>Αλγόριθμοι & Δομές Δεδομένων</strong> (Σελίδες 1–5).
+      </span>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <a href="./study.html" class="btn red" style="padding:6px 14px;font-size:13px;">Φόρτωσε δικό σου PDF ➔</a>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- Left panel: PDF Source Simulator -->
+    <div class="left-panel">
+      <div class="pdf-container" id="pdfContainer">
+        <div class="pdf-reader-box">
+          <div class="pdf-header-tag">📄 Πανεπιστημιακό Σύγγραμμα · Σελίδα 1/5</div>
+          <h2 style="margin-bottom:12px;color:#991b1b;">Κεφάλαιο 4: Βασικές Αρχές Αλγορίθμων</h2>
+          <p style="margin-bottom:12px;">
+            Ένας <strong>αλγόριθμος</strong> είναι μια πεπερασμένη σειρά ενεργειών, αυστηρά καθορισμένων και εκτελέσιμων σε πεπερασμένο χρόνο, που στοχεύουν στην επίλυση ενός προβλήματος.
+          </p>
+          <h3 style="margin:16px 0 8px;font-size:16px;color:#1e293b;">4.1 Θεμελιώδη Κριτήρια Αλγορίθμου</h3>
+          <p>Κάθε αλγόριθμος οφείλει να πληροί αυστηρά τα ακόλουθα 5 βασικά κριτήρια:</p>
+          <ul style="margin:8px 0 14px 20px;">
+            <li><strong>Είσοδος (Input):</strong> Καμία, μία ή περισσότερες τιμές εισόδου.</li>
+            <li><strong>Έξοδος (Output):</strong> Τουλάχιστον μία τιμή αποτελέσματος.</li>
+            <li><strong>Καθοριστικότητα (Definiteness):</strong> Κάθε εντολή πρέπει να διατυπώνεται με απόλυτη σαφήνεια.</li>
+            <li><strong>Πεπεραστικότητα (Finiteness):</strong> Υποχρεωτικός τερματισμός μετά από πεπερασμένο αριθμό βημάτων.</li>
+            <li><strong>Αποτελεσματικότητα (Effectiveness):</strong> Κάθε εντολή πρέπει να είναι απλή και εκτελέσιμη.</li>
+          </ul>
+
+          <h3 style="margin:16px 0 8px;font-size:16px;color:#1e293b;">4.2 Ανάλυση Πολυπλοκότητας</h3>
+          <p>
+            Η χρονική πολυπλοκότητα εκφράζεται με τον συμβολισμό Big-O: $\mathcal{O}(n)$, $\mathcal{O}(n \log n)$ και $\mathcal{O}(n^2)$.
+            Για αναδρομικούς αλγορίθμους όπως το Merge Sort, η σχέση περιγράφεται από την εξίσωση:
+          </p>
+          <div style="background:#f8fafc;padding:8px;border-left:3px solid #3b82f6;margin:10px 0;">
+            $$T(n) = 2T(n/2) + \mathcal{O}(n) \implies T(n) = \mathcal{O}(n \log n)$$
+          </div>
+
+          <h3 style="margin:16px 0 8px;font-size:16px;color:#1e293b;">4.3 Ψευδοκώδικας Αναζήτησης</h3>
+          <div class="code-box">
+function binarySearch(A, target):
+    low = 0, high = length(A) - 1
+    while low <= high:
+        mid = floor((low + high) / 2)
+        if A[mid] == target: return mid
+        else if A[mid] < target: low = mid + 1
+        else: high = mid - 1
+    return -1
+          </div>
+          <p style="color:#64748b;font-size:12px;margin-top:14px;">[Πηγή: Εισαγωγή στην Επιστήμη των Υπολογιστών, Τμήμα Πληροφορικής]</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right panel: Interactive Study Workspace -->
+    <div class="right-panel">
+      <div id="viewSet" style="display:flex;flex:1;min-height:0;flex-direction:column">
+        <div class="toolbar">
+          <span id="setTitle" style="font-weight:700;margin:0 8px;color:#1e293b;">🎓 Αλγόριθμοι & Δομές</span>
+          <span style="width:2px;height:22px;background:#ddd"></span>
+          <button class="mode-btn active" data-mode="study">📖 Μελέτη</button>
+          <button class="mode-btn" data-mode="tf">✔️❌ Σωστό/Λάθος</button>
+          <button class="mode-btn" data-mode="mcq">🔘 Πολλαπλής</button>
+          <button class="mode-btn" data-mode="fill">🧩 Σύνθεση</button>
+          <button class="mode-btn" data-mode="cloze">📝 Κενά Θεωρίας</button>
+          <button class="mode-btn" data-mode="free">✍️ Ελεύθερη (AI)</button>
+        </div>
+
+        <div class="scroll-viewport">
+          <div class="scroll-content">
+            <div class="col-headers-row">
+              <div class="col-header-title">Θεωρία / Έννοιες</div>
+              <div class="col-header-title">Ερωτήσεις / Εξάσκηση</div>
+              <div class="col-header-title">Αξιολόγηση</div>
+            </div>
+            <div class="content-area" id="content-area"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="global-footer">
+    <div class="footer-left">
+      <strong>📄 LearnerDesk Interactive Demo</strong>
+      <a href="./study.html" class="upload-btn" style="text-decoration:none;display:inline-block;margin-left:12px;">Ανέβασε το δικό σου PDF</a>
+    </div>
+    <div class="footer-right">
+      <span style="font-size:13px;color:#666;">Έτοιμο για δοκιμή χωρίς εγγραφή</span>
+    </div>
+  </div>
+
+  <script>
+    // Προκαθορισμένο δείγμα μελέτης που παράγεται από το Gemini
+    const SAMPLE_SET = {
+      id: 'demo_algorithms',
+      title: 'Αλγόριθμοι & Δομές Δεδομένων',
+      sections: [
+        {
+          id: 'sec1',
+          title: 'Ενότητα 1: Ορισμός & Κριτήρια Αλγορίθμου',
+          theory: '<p>Ένας <strong>αλγόριθμος</strong> είναι μια πεπερασμένη ακολουθία σαφών εντολών. Κάθε αλγόριθμος ικανοποιεί 5 βασικά κριτήρια: <em>Είσοδος</em>, <em>Έξοδος</em>, <em>Καθοριστικότητα</em>, <em>Πεπεραστικότητα</em>, και <em>Αποτελεσματικότητα</em>. Αν μια διαδικασία δεν τερματίζει ποτέ, δεν θεωρείται αλγόριθμος αλλά υπολογιστική διαδικασία.</p>',
+          questions: {
+            tf: [
+              { q: 'Ένας αλγόριθμος μπορεί να μην τερματίζει ποτέ και να εκτελείται επ\' άπειρον.', ans: 'false', correctDisplay: 'Λάθος', feedback: 'Σύμφωνα με το κριτήριο της πεπεραστικότητας, ο αλγόριθμος πρέπει υποχρεωτικά να τερματίζει μετά από πεπερασμένα βήματα.' },
+              { q: 'Είναι δυνατόν ένας αλγόριθμος να μην έχει καμία τιμή εισόδου (0 δεδομένα εισόδου).', ans: 'true', correctDisplay: 'Σωστό', feedback: 'Σωστά! Η είσοδος μπορεί να είναι 0, 1 ή περισσότερες τιμές (π.χ. παραγωγή των πρώτων 100 πρώτων αριθμών).' },
+              { q: 'Η αποτελεσματικότητα σημαίνει ότι κάθε εντολή είναι απλή και εκτελέσιμη.', ans: 'true', correctDisplay: 'Σωστό', feedback: 'Ακριβώς, κάθε επιμέρους εντολή πρέπει να μπορεί να πραγματοποιηθεί από τον υπολογιστή.' }
+            ],
+            mcq: [
+              { q: 'Ποιο από τα παρακάτω ΔΕΝ αποτελεί θεμελιώδες κριτήριο ενός αλγορίθμου;', options: ['Καθοριστικότητα', 'Απειρία βημάτων', 'Πεπεραστικότητα'], ans: '1', correctDisplay: 'Απειρία βημάτων', feedback: 'Η απειρία απαγορεύεται. Ο αλγόριθμος οφείλει να είναι πεπερασμένος.' },
+              { q: 'Η απαίτηση κάθε εντολή να είναι απόλυτα σαφής και χωρίς αμφισημία αντιστοιχεί στην:', options: ['Καθοριστικότητα', 'Είσοδο', 'Έξοδο'], ans: '0', correctDisplay: 'Καθοριστικότητα', feedback: 'Η καθοριστικότητα εξασφαλίζει ότι δεν υπάρχει καμία ασάφεια ως προς την εκτέλεση.' },
+              { q: 'Πόσες τιμές εξόδου (αποτελέσματα) απαιτείται να παράγει τουλάχιστον ένας αλγόριθμος;', options: ['Καμία (0)', 'Τουλάχιστον μία (≥1)', 'Υποχρεωτικά δύο (2)'], ans: '1', correctDisplay: 'Τουλάχιστον μία (≥1)', feedback: 'Ένας αλγόριθμος έχει πάντα σκοπό να παράγει ένα ή περισσότερα αποτελέσματα.' }
+            ],
+            fill: [
+              { q: 'Η ιδιότητα κατά την οποία ένας αλγόριθμος τερματίζει σε πεπερασμένο χρόνο ονομάζεται ___.', pool: ['πεπεραστικότητα', 'πολυπλοκότητα', 'αναδρομή'], ans: 'πεπεραστικότητα', correctDisplay: 'πεπεραστικότητα', feedback: 'Η πεπεραστικότητα (finiteness) είναι απαραίτητο κριτήριο.' },
+              { q: 'Κάθε εντολή πρέπει να διατυπώνεται με απόλυτη σαφήνεια βάσει του κριτηρίου της ___.', pool: ['καθοριστικότητας', 'αποδοτικότητας', 'ταξινόμησης'], ans: 'καθοριστικότητας', correctDisplay: 'καθοριστικότητας', feedback: 'Αυτός είναι ο ορισμός της καθοριστικότητας.' }
+            ],
+            cloze: [
+              { q: 'Συμπλήρωσε τα κενά της θεωρίας:', html: 'Ο αλγόριθμος απαιτεί [0] αριθμό βημάτων και τουλάχιστον μία τιμή [1].', ans: ['πεπερασμένο', 'εξόδου'] }
+            ],
+            free: [
+              { q: 'Εξήγησε συνοπτικά γιατί η πεπεραστικότητα είναι κρίσιμο χαρακτηριστικό ενός αλγορίθμου.', correctDisplay: 'Διότι αν μια διαδικασία εκτελείται επ\' άπειρον χωρίς να τερματίζει, δεν παράγει τελικό αποτέλεσμα και δεν αποτελεί αλγόριθμο.' }
+            ]
+          }
+        },
+        {
+          id: 'sec2',
+          title: 'Ενότητα 2: Πολυπλοκότητα & Δυαδική Αναζήτηση',
+          theory: '<p>Η <strong>χρονική πολυπλοκότητα</strong> ενός αλγορίθμου μετρά τον ρυθμό αύξησης του αριθμού των πράξεων συναρτήσει του μεγέθους των δεδομένων $n$. Η <em>δυαδική αναζήτηση</em> (Binary Search) απαιτεί ταξινομημένο πίνακα και επιτυγχάνει λογαριθμικό χρόνο $\\mathcal{O}(\\log n)$, έναντι $\\mathcal{O}(n)$ της σειριακής αναζήτησης.</p>',
+          questions: {
+            tf: [
+              { q: 'Η δυαδική αναζήτηση μπορεί να εφαρμοστεί σε οποιονδήποτε πίνακα, ακόμη κι αν δεν είναι ταξινομημένος.', ans: 'false', correctDisplay: 'Λάθος', feedback: 'Η δυαδική αναζήτηση απαιτεί υποχρεωτικά ταξινομημένα δεδομένα.' },
+              { q: 'Η πολυπλοκότητα $\\mathcal{O}(\\log n)$ είναι αποδοτικότερη από την $\\mathcal{O}(n)$ για μεγάλα $n$.', ans: 'true', correctDisplay: 'Σωστό', feedback: 'Ο λογάριθμος αυξάνεται πολύ πιο αργά από τη γραμμική συνάρτηση.' }
+            ],
+            mcq: [
+              { q: 'Ποια είναι η χρονική πολυπλοκότητα της δυαδικής αναζήτησης;', options: ['O(n)', 'O(log n)', 'O(n^2)'], ans: '1', correctDisplay: 'O(log n)', feedback: 'Σε κάθε βήμα ο πίνακας υποδιπλασιάζεται, άρα απαιτούνται log2(n) συγκρίσεις.' }
+            ],
+            fill: [
+              { q: 'Για να εκτελεστεί δυαδική αναζήτηση, ο πίνακας πρέπει να είναι ___.', pool: ['ταξινομημένος', 'ανεστραμμένος', 'άδειος'], ans: 'ταξινομημένος', correctDisplay: 'ταξινομημένος', feedback: 'Η προϋπόθεση είναι η ταξινόμηση.' }
+            ],
+            cloze: [
+              { q: 'Συμπλήρωσε τα κενά:', html: 'Η σειριακή αναζήτηση έχει πολυπλοκότητα [0], ενώ η δυαδική αναζήτηση [1].', ans: ['O(n)', 'O(log n)'] }
+            ],
+            free: [
+              { q: 'Ποιο είναι το πλεονέκτημα της δυαδικής αναζήτησης έναντι της σειριακής;', correctDisplay: 'Είναι δραματικά ταχύτερη σε μεγάλες συλλογές δεδομένων επειδή υποδιπλασιάζει το εύρος αναζήτησης σε κάθε βήμα.' }
+            ]
+          }
+        }
+      ]
+    };
+
+    let mode = 'study', openSection = 'sec1', answers = {};
+    const norm = s => String(s).trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+
+    function setMode(m) {
+      mode = m;
+      document.querySelectorAll('[data-mode]').forEach(b => b.classList.toggle('active', b.dataset.mode === m));
+      document.getElementById('pdfContainer').classList.toggle('pdf-blur', m !== 'study');
+      render();
+    }
+
+    function render() {
+      const area = document.getElementById('content-area');
+      area.innerHTML = '';
+      const isStudy = mode === 'study';
+
+      SAMPLE_SET.sections.forEach(sec => {
+        const qs = isStudy ? sec.questions.free : sec.questions[mode];
+        if (!qs || !qs.length) return;
+        const active = openSection === sec.id;
+        let rows = '';
+
+        qs.forEach((q, i) => {
+          const key = `${sec.id}_${i}`, ua = answers[key];
+          rows += `<div class="question-row"><div class="col-exercise">${exerciseHtml(sec, q, i, key, ua, isStudy)}</div>
+            <div class="col-answer ${!isStudy && (!ua || ua.loading) ? 'blur-col' : ''}">${answerHtml(q, ua, isStudy)}</div></div>`;
+        });
+
+        area.insertAdjacentHTML('beforeend', `<button class="topic-button" data-toggle="${sec.id}">${sec.title}</button>
+          <div class="content-box ${active ? 'active' : ''}"><div class="row-card"><div class="col-theory ${isStudy ? '' : 'blur-col'}">${sec.theory}</div>
+          <div class="col-right-wrapper">${rows}</div></div></div>`);
+      });
+
+      if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise();
+    }
+
+    function exerciseHtml(sec, q, i, key, ua, isStudy) {
+      if (isStudy) return `<div style="font-weight:600;margin-bottom:12px">${i + 1}. ${q.q}</div><div class="study-answer"><b>Απάντηση:</b> ${q.correctDisplay}</div>`;
+      let h = `<div style="font-weight:600;margin-bottom:14px;color:#c62828">${i + 1}. ${q.q}</div>`;
+      const dis = ua ? 'disabled' : '';
+
+      if (mode === 'tf') {
+        [['true', '✔ Σωστό'], ['false', '✘ Λάθος']].forEach(([v, l]) => {
+          const cls = ua ? (v === q.ans ? 'ans-correct' : ua.value === v ? 'ans-wrong' : '') : '';
+          h += `<label class="opt-label ${cls}"><input type="radio" name="in_${key}" value="${v}" ${ua?.value === v ? 'checked' : ''} ${dis}>${l}</label>`;
+        });
+      } else if (mode === 'mcq') {
+        q.options.forEach((o, n) => {
+          const cls = ua ? (String(n) === q.ans ? 'ans-correct' : ua.value === String(n) ? 'ans-wrong' : '') : '';
+          h += `<label class="opt-label ${cls}"><input type="radio" name="in_${key}" value="${n}" ${ua?.value === String(n) ? 'checked' : ''} ${dis}>${o}</label>`;
+        });
+      } else if (mode === 'fill') {
+        q.pool.forEach((w, n) => {
+          const sel = ua ? ua.value === w : (answers['_sel_' + key] === w);
+          const cls = ua ? (w === q.ans ? 'ans-correct' : sel ? 'ans-wrong' : '') : (sel ? 'selected' : '');
+          h += `<button class="word-chip ${cls}" data-chip="${key}" data-idx="${n}" ${dis}>${w}</button>`;
+        });
+      } else if (mode === 'cloze') {
+        let s = q.html;
+        q.ans.forEach((a, n) => {
+          const v = ua ? ua.values[n] || '' : '';
+          const cls = ua ? (norm(v) === norm(a) ? 'ans-correct' : 'ans-wrong') : '';
+          s = s.replace(`[${n}]`, `<input type="text" class="cloze-in ${cls}" data-cloze="${key}" data-n="${n}" value="${v}" style="width:${Math.max(a.length, 4) + 2}ch" ${dis} autocomplete="off">`);
+        });
+        h += `<div style="line-height:2.2;padding:14px;background:#fff;border-radius:8px;border:2px dashed var(--border)">${s}</div>`;
+      } else if (mode === 'free') {
+        h += ua && !ua.loading
+          ? `<div class="${ua.verdict === 'correct' ? 'ans-correct' : 'ans-partial'}" style="padding:12px;border-radius:6px;border:2px solid;font-size:14px">${ua.value}</div>`
+          : `<textarea id="in_${key}" rows="4" placeholder="Γράψε την απάντησή σου εδώ..." ${ua?.loading ? 'disabled' : ''}>${ua?.value || ''}</textarea>`;
+      }
+
+      if (!ua) h += `<div style="margin-top:14px"><button class="btn-check" data-check="${sec.id}" data-i="${i}">Επιβεβαίωση</button></div>`;
+      else if (ua.loading) h += `<div style="margin-top:14px"><span class="spin"></span> <b style="color:#3b82f6;font-size:13px">Αξιολόγηση μέσω AI…</b></div>`;
+      return h;
+    }
+
+    function answerHtml(q, ua, isStudy) {
+      if (isStudy || !ua) return `<div class="muted">—</div>`;
+      if (ua.loading) return `<div style="font-weight:600">${q.correctDisplay}</div><div class="hr"></div><div class="muted">…</div>`;
+      let correct = q.correctDisplay;
+      let fb;
+      if (mode === 'free') {
+        const cls = ua.verdict === 'correct' ? 'badge-correct' : 'badge-partial';
+        const ic = ua.verdict === 'correct' ? '✅' : '💡';
+        fb = `<div class="verdict-badge ${cls}" style="margin-bottom:8px">${ic} ${ua.short}</div><div style="font-size:14px">${ua.feedback}</div>`;
+      } else {
+        const ok = ua.verdict === 'correct';
+        fb = `<div class="verdict-badge ${ok ? 'badge-correct' : 'badge-wrong'}" style="margin-bottom:8px">${ok ? '✅' : '❌'} ${ok ? 'Σωστό' : 'Λάθος'}</div><div style="font-size:14px">${ua.feedback}</div>`;
+      }
+      return `<div class="lbl">Σωστή απάντηση</div><div style="font-weight:600">${correct}</div><div class="hr"></div><div class="lbl">Αξιολόγηση</div>${fb}`;
+    }
+
+    function check(secId, i) {
+      const sec = SAMPLE_SET.sections.find(s => s.id === secId), q = sec.questions[mode][i], key = `${secId}_${i}`;
+      if (mode === 'tf' || mode === 'mcq') {
+        const sel = document.querySelector(`input[name="in_${key}"]:checked`);
+        if (!sel) return alert('Επίλεξε μια απάντηση!');
+        answers[key] = { verdict: sel.value === q.ans ? 'correct' : 'wrong', value: sel.value, feedback: q.feedback };
+      } else if (mode === 'fill') {
+        const v = answers['_sel_' + key];
+        if (!v) return alert('Επίλεξε μια λέξη!');
+        answers[key] = { verdict: v === q.ans ? 'correct' : 'wrong', value: v, feedback: q.feedback };
+      } else if (mode === 'cloze') {
+        const values = q.ans.map((_, n) => (document.querySelector(`[data-cloze="${key}"][data-n="${n}"]`)?.value || '').trim());
+        if (values.some(v => !v)) return alert('Συμπλήρωσε όλα τα κενά!');
+        const ok = q.ans.every((a, n) => norm(values[n]) === norm(a));
+        answers[key] = { verdict: ok ? 'correct' : 'wrong', values, feedback: ok ? 'Άριστα! Θυμάσαι ακριβώς τη θεωρία.' : 'Κάποια κενά είναι λάθος. Δες τη σωστή απάντηση.' };
+      } else if (mode === 'free') {
+        const v = (document.getElementById(`in_${key}`)?.value || '').trim();
+        if (!v) return alert('Γράψε την απάντησή σου!');
+        answers[key] = { loading: true, value: v };
+        render();
+        setTimeout(() => {
+          const isGood = v.length > 15;
+          answers[key] = {
+            verdict: isGood ? 'correct' : 'partial',
+            short: isGood ? 'Πλήρης απάντηση' : 'Μερικώς ικανοποιητική',
+            feedback: isGood
+              ? 'Εξαιρετικά! Κάλυψες την ουσία του κριτηρίου πεπεραστικότητας και τη σημασία του τερματισμού.'
+              : 'Η απάντησή σου είναι στη σωστή κατεύθυνση, αλλά θα μπορούσες να αναφέρεις και το τελικό αποτέλεσμα.',
+            value: v
+          };
+          render();
+        }, 800);
+        return;
+      }
+      render();
+    }
+
+    document.addEventListener('click', e => {
+      const el = e.target.closest('[data-toggle],[data-mode],[data-check],[data-chip]');
+      if (!el) return;
+      if (el.dataset.toggle) { openSection = openSection === el.dataset.toggle ? null : el.dataset.toggle; render(); }
+      else if (el.dataset.mode) setMode(el.dataset.mode);
+      else if (el.dataset.check) check(el.dataset.check, +el.dataset.i);
+      else if (el.dataset.chip) {
+        const [secId, idx] = [el.dataset.chip.replace(/_\d+$/, ''), el.dataset.chip.match(/_(\d+)$/)[1]];
+        const q = SAMPLE_SET.sections.find(s => s.id === secId).questions.fill[+idx];
+        const w = q.pool[+el.dataset.idx], k = '_sel_' + el.dataset.chip;
+        answers[k] = answers[k] === w ? '' : w;
+        render();
+      }
+    });
+
+    LD.renderHeader('demo');
+    render();
+  </script>
+</body>
+</html>

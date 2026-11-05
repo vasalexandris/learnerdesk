@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./public/assets/app.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+  <script src="./public/assets/config.js"></script>
+  <script src="./public/assets/i18n.js"></script>
+  <script src="./public/assets/app.js"></script>
+  <title>LearnerDesk — PDF → Διαδραστική Μελέτη με AI</title>
+</head>
+<body>
+  <div id="site-header"></div>
+
+  <main class="wrap">
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="hero-badge" data-i18n="hero_badge">✨ Τροφοδοτείται από Google Gemini AI</div>
+      <h1 data-i18n="hero_title">Ανέβασε ένα PDF. Μάθε το.</h1>
+      <p data-i18n="hero_sub">Το AI διαβάζει το μάθημά σου (ακόμα και σκαναρισμένο, με OCR) και φτιάχνει περιβάλλον μελέτης: θεωρία, Σωστό/Λάθος, Πολλαπλής, Κενά και ελεύθερες απαντήσεις με αξιολόγηση.</p>
+      
+      <div class="hero-actions">
+        <a class="btn red lg" href="./public/demo.html" data-i18n="hero_cta_demo">Δοκίμασε το Live Demo ➔</a>
+        <a class="btn ghost lg" href="./public/study.html" data-i18n="hero_cta_study">Ανέβασε δικό σου PDF</a>
+      </div>
+
+      <div class="hero-pills">
+        <span class="hero-pill" data-i18n="hero_pill_pdf">🔒 Το PDF δεν αποθηκεύεται</span>
+        <span class="hero-pill" data-i18n="hero_pill_ocr">📄 OCR σε σκαναρισμένα</span>
+        <span class="hero-pill" data-i18n="hero_pill_eval">🎯 Άμεση AI Αξιολόγηση</span>
+      </div>
+    </section>
+
+    <!-- Interactive Workspace Preview -->
+    <section class="preview-container">
+      <div class="preview-topbar">
+        <div style="font-weight:700;display:flex;align-items:center;gap:8px">
+          <span style="font-size:18px">💻</span>
+          <span data-i18n="preview_badge">Διαδραστική Προεπισκόπηση Μελέτης</span>
+        </div>
+        <a href="./public/demo.html" class="preview-tag" style="text-decoration:none;cursor:pointer;">Άνοιγμα Live Demo ➔</a>
+      </div>
+
+      <div class="preview-grid">
+        <!-- Mock PDF Pane -->
+        <div class="preview-pane">
+          <div class="preview-pane-header" data-i18n="preview_col_pdf">📄 Πρωτότυπο PDF</div>
+          <div class="preview-mock-pdf">
+            <h4 style="margin-bottom:8px;color:#1e293b;">4.1 Ορισμός και Χαρακτηριστικά Αλγορίθμου</h4>
+            <p style="margin-bottom:8px;">Ένας <strong>αλγόριθμος</strong> ορίζεται ως μια πεπερασμένη ακολουθία ενεργειών, αυστηρά καθορισμένων και εκτελέσιμων σε πεπερασμένο χρόνο...</p>
+            <div style="background:#f1f5f9;padding:6px 10px;border-radius:4px;font-family:monospace;font-size:12px;margin:8px 0;">
+              Κριτήρια: Είσοδος, Έξοδος, Καθοριστικότητα, Πεπεραστικότητα, Αποτελεσματικότητα.
+            </div>
+            <p style="color:#64748b;font-size:12px;">[Σελίδα 42 / 120 · Σημειώσεις Πανεπιστημίου]</p>
+          </div>
+        </div>
+
+        <!-- Mock Study / Quiz Pane -->
+        <div class="preview-pane">
+          <div class="preview-pane-header" data-i18n="preview_col_quiz">🎯 Εξάσκηση & AI Έλεγχος</div>
+          <div class="preview-mock-study">
+            <div class="preview-tabs">
+              <span class="preview-tab active">🔘 Πολλαπλής</span>
+              <span class="preview-tab">✔️❌ Σ/Λ</span>
+              <span class="preview-tab">🧩 Σύνθεση</span>
+              <span class="preview-tab">✍️ AI Έλεγχος</span>
+            </div>
+
+            <div class="preview-q-card">
+              <div style="font-weight:600;margin-bottom:8px;color:#b91c1c;">1. Ποιο από τα παρακάτω ΔΕΝ αποτελεί κριτήριο αλγορίθμου;</div>
+              <div class="preview-q-opt">Α. Πεπεραστικότητα</div>
+              <div class="preview-q-opt correct">✓ Β. Απειρία επαναλήψεων (Επιλεγμένο)</div>
+              <div class="preview-q-opt">Γ. Καθοριστικότητα</div>
+              <div class="preview-eval-box">
+                <strong>Αξιολόγηση:</strong> ✅ Σωστό! Ένας αλγόριθμος πρέπει υποχρεωτικά να τερματίζει μετά από πεπερασμένο αριθμό βημάτων.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <h2 class="section-title" data-i18n="features_heading">Όλα όσα χρειάζεσαι για γρήγορη & αποδοτική μελέτη</h2>
+    <p class="section-sub" data-i18n="features_sub">Από ένα απλό PDF σε ένα πλήρες, διαδραστικό εργαστήριο κατανόησης και εξάσκησης.</p>
+
+    <div class="grid3">
+      <div class="card">
+        <div class="card-icon">📑</div>
+        <h3 data-i18n="f1_t">Έξυπνη Κατάτμηση σε Ενότητες</h3>
+        <p data-i18n="f1_d">Το Gemini αναλύει το έγγραφο και το χωρίζει αυτόματα σε 2-8 λογικές θεματικές ενότητες με περιεκτική θεωρία.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-icon">🎯</div>
+        <h3 data-i18n="f2_t">5 Τύποι Ασκήσεων</h3>
+        <p data-i18n="f2_d">Σωστό/Λάθος, Πολλαπλής Επιλογής, Σύνθεση Λέξεων, Συμπλήρωση Κενών Θεωρίας και Ερωτήσεις Ανάπτυξης.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-icon">🤖</div>
+        <h3 data-i18n="f3_t">AI Αξιολόγηση & Feedback</h3>
+        <p data-i18n="f3_d">Γράψε με δικά σου λόγια και πάρε άμεση βαθμολόγηση με επεξηγηματικά σχόλια βελτίωσης.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-icon">🔍</div>
+        <h3 data-i18n="f4_t">Εγγενές OCR & Ελληνικά</h3>
+        <p data-i18n="f4_d">Διαβάζει καθαρά σκαναρισμένες σελίδες, πανεπιστημιακές σημειώσεις και μαθηματικούς τύπους LaTeX.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-icon">🖥️</div>
+        <h3 data-i18n="f5_t">Split-Screen Περιβάλλον</h3>
+        <p data-i18n="f5_d">Μελετάς έχοντας το πρωτότυπο PDF δίπλα στη θεωρία και τις ερωτήσεις χωρίς να αλλάζεις παράθυρα.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-icon">🎧</div>
+        <h3 data-i18n="f6_t">Συγχρονισμένο Audio</h3>
+        <p data-i18n="f6_d">Φόρτωσε το ηχητικό της διάλεξης και άκουγε παράλληλα με τις διαφάνειες και τις ασκήσεις σου.</p>
+      </div>
+    </div>
+
+    <!-- How it works -->
+    <h2 class="section-title" data-i18n="how_heading">Πώς λειτουργεί σε 3 απλά βήματα</h2>
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="step-num">1</div>
+        <h3 data-i18n="how_step1_t" style="margin-bottom:8px;color:var(--ink);">1. Φόρτωσε το PDF</h3>
+        <p data-i18n="how_step1_d">Επίλεξε τις σελίδες που θέλεις να διαβάσεις. Υποστηρίζονται και σκαναρισμένα αρχεία.</p>
+      </div>
+
+      <div class="step-card">
+        <div class="step-num">2</div>
+        <h3 data-i18n="how_step2_t" style="margin-bottom:8px;color:var(--ink);">2. Το AI αναλύει την ύλη</h3>
+        <p data-i18n="how_step2_d">Το Gemini δημιουργεί αυτόματα δομημένη θεωρία και 5 κατηγορίες στοχευμένων ασκήσεων.</p>
+      </div>
+
+      <div class="step-card">
+        <div class="step-num">3</div>
+        <h3 data-i18n="how_step3_t" style="margin-bottom:8px;color:var(--ink);">3. Εξασκήσου & Αξιολογήσου</h3>
+        <p data-i18n="how_step3_d">Λύνεις τα κουίζ δίπλα στο κείμενο, γράφεις απαντήσεις και παίρνεις άμεσο AI feedback.</p>
+      </div>
+    </div>
+
+    <!-- Bottom CTA Banner -->
+    <section class="cta-banner">
+      <h2 data-i18n="cta_bottom_title">Έτοιμος να αλλάξεις τον τρόπο που διαβάζεις;</h2>
+      <p data-i18n="cta_bottom_sub">Ξεκίνα δωρεάν σήμερα και δες τις σημειώσεις σου να μετατρέπονται σε διαδραστικό μάθημα.</p>
+      <a class="btn red lg" href="./public/demo.html" data-i18n="cta_bottom_btn">Δοκίμασε το Live Demo Δωρεάν ➔</a>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-links">
+      <a href="./public/demo.html" data-i18n="nav_demo">Live Demo</a>
+      <a href="./public/study.html" data-i18n="nav_study">Μελέτη</a>
+      <a href="./public/dashboard.html" data-i18n="nav_dashboard">Πίνακας</a>
+      <a href="./public/pricing.html" data-i18n="nav_pricing">Τιμές</a>
+      <a href="./public/auth.html" data-i18n="nav_login">Σύνδεση</a>
+    </div>
+    <p data-i18n="footer_copy">© LearnerDesk — Ευφυές Περιβάλλον Μελέτης με AI.</p>
+  </footer>
+
+  <script>
+    LD.renderHeader('home');
+  </script>
+</body>
+</html>

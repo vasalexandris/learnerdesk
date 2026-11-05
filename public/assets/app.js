@@ -17,12 +17,34 @@
   }
   function setLang(l) { lang = l; store.set('ld_lang', l); location.reload(); }
 
-  // ---- Supabase ----
-  const sb = CFG.SUPABASE_URL && window.supabase ? window.supabase.createClient(CFG.SUPABASE_URL, CFG.SUPABASE_ANON_KEY) : null;
-  async function getSession() { if (!sb) return null; const { data } = await sb.auth.getSession(); return data.session; }
+  // ---- Path / Route Helper for GitHub Pages & Localhost ----
+  function pageUrl(page) {
+    const p = location.pathname.toLowerCase();
+    const isGh = p.includes('/learnerdesk');
+    const inPublic = p.includes('/public');
+    if (isGh) {
+      if (page === 'home') return inPublic ? '../index.html' : './index.html';
+      return inPublic ? `./${page}.html` : `./public/${page}.html`;
+    }
+    if (page === 'home') return '/';
+    return `/${page}.html`;
+  }
+
+  // ---- Supabase / Dev Mode Auth ----
+  const hasSupabaseConfig = !!(CFG && CFG.SUPABASE_URL && CFG.SUPABASE_ANON_KEY);
+  const sb = hasSupabaseConfig && window.supabase ? window.supabase.createClient(CFG.SUPABASE_URL, CFG.SUPABASE_ANON_KEY) : null;
+
+  async function getSession() {
+    if (!sb) {
+      return { access_token: 'dev-token', user: { id: 'dev-user-001', email: 'tester@learnerdesk.local' } };
+    }
+    const { data } = await sb.auth.getSession();
+    return data.session;
+  }
+
   async function requireSession() {
     const s = await getSession();
-    if (!s) { location.href = '/auth?next=' + encodeURIComponent(location.pathname); throw new Error('no_session'); }
+    if (!s) { location.href = pageUrl('auth') + '?next=' + encodeURIComponent(location.pathname); throw new Error('no_session'); }
     return s;
   }
 
@@ -30,9 +52,10 @@
   async function api(path, { method = 'GET', body } = {}) {
     const s = await getSession();
     const headers = {};
-    if (s) headers.Authorization = 'Bearer ' + s.access_token;
+    if (s?.access_token) headers.Authorization = 'Bearer ' + s.access_token;
     if (body !== undefined) headers['Content-Type'] = 'application/json';
-    const r = await fetch(CFG.API_URL + '/api' + path, { method, headers, body: body !== undefined ? JSON.stringify(body) : undefined });
+    const apiUrl = (CFG && CFG.API_URL) || 'http://localhost:8080';
+    const r = await fetch(apiUrl + '/api' + path, { method, headers, body: body !== undefined ? JSON.stringify(body) : undefined });
     const data = await r.json().catch(() => ({}));
     if (!r.ok) throw Object.assign(new Error(data.error || 'error'), { status: r.status, data });
     return data;
@@ -48,18 +71,18 @@
     if (!host) return;
     const s = await getSession();
     let isAdmin = false;
-    if (s) { try { isAdmin = (await api('/me')).is_admin; } catch {} }
-    const link = (href, key) => `<a href="${href}" class="${active === key ? 'active' : ''}" data-i18n="nav_${key}"></a>`;
-    host.innerHTML = `<header class="site-header"><a class="brand" href="/">🎓 LearnerDesk</a><nav>
-      ${link('/study', 'study')}${link('/dashboard', 'dashboard')}${link('/pricing', 'pricing')}${isAdmin ? link('/admin', 'admin') : ''}
-      ${s ? '<a href="#" id="logout" data-i18n="nav_logout"></a>' : link('/auth', 'login')}
+    if (s && CFG && CFG.API_URL) { try { isAdmin = (await api('/me')).is_admin; } catch {} }
+    const link = (page, key) => `<a href="${pageUrl(page)}" class="${active === key ? 'active' : ''}" data-i18n="nav_${key}"></a>`;
+    host.innerHTML = `<header class="site-header"><a class="brand" href="${pageUrl('home')}">🎓 LearnerDesk</a><nav>
+      ${link('demo', 'demo')}${link('study', 'study')}${link('dashboard', 'dashboard')}${link('pricing', 'pricing')}${isAdmin ? link('admin', 'admin') : ''}
+      ${sb ? (s ? '<a href="#" id="logout" data-i18n="nav_logout"></a>' : `<a href="${pageUrl('auth')}" data-i18n="nav_login"></a>`) : '<span style="font-size:12px;opacity:0.8;padding:2px 8px;background:rgba(255,255,255,0.2);border-radius:4px;">Dev / Demo</span>'}
       <button id="lang-btn" class="lang-btn">${t('lang_switch')}</button></nav></header>`;
     document.getElementById('lang-btn').onclick = () => setLang(lang === 'el' ? 'en' : 'el');
     const lo = document.getElementById('logout');
-    if (lo) lo.onclick = async e => { e.preventDefault(); await sb.auth.signOut(); location.href = '/'; };
+    if (lo && sb) lo.onclick = async e => { e.preventDefault(); await sb.auth.signOut(); location.href = pageUrl('home'); };
     applyI18n(host);
   }
 
-  window.LD = { t, applyI18n, setLang, sb, getSession, requireSession, api, errText, esc, renderHeader, store, get lang() { return lang; } };
+  window.LD = { t, applyI18n, setLang, sb, getSession, requireSession, api, errText, esc, renderHeader, pageUrl, store, get lang() { return lang; } };
   document.addEventListener('DOMContentLoaded', () => applyI18n());
 })();
