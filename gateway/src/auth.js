@@ -1,9 +1,10 @@
-import { supabase, adminEmails } from './config.js';
+import { supabase, adminEmails, devMode } from './config.js';
 
 // Επαληθεύει το Supabase JWT και βάζει req.user.
-// Σε Dev Mode (όταν δεν έχει οριστεί Supabase), παρέχει έναν mock χρήστη για άμεση τοπική δοκιμή.
+// Σε Dev Mode (DEV_MODE=1 ΚΑΙ χωρίς Supabase), παρέχει έναν mock χρήστη για άμεση τοπική δοκιμή.
 export async function requireUser(req, res, next) {
-  if (!supabase) {
+  if (!supabase && !devMode) return res.status(503).json({ error: 'server_not_configured' });
+  if (devMode && !supabase) {
     req.user = { id: 'dev-user-001', email: 'tester@learnerdesk.local' };
     return next();
   }
@@ -16,7 +17,7 @@ export async function requireUser(req, res, next) {
 }
 
 export function requireAdmin(req, res, next) {
-  if (!supabase) return next();
+  if (devMode && !supabase) return next();
   const email = (req.user?.email || '').toLowerCase();
   if (!adminEmails.includes(email)) return res.status(403).json({ error: 'forbidden' });
   next();
