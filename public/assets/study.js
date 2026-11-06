@@ -60,7 +60,8 @@
     fr.readAsDataURL(file);
   });
 
-  // Client-side Direct Gemini Generation Fallback
+  // Client-side Direct Gemini Generation Fallback (μόνο όταν ALLOW_CLIENT_GEMINI=true — ΟΧΙ σε production)
+  const CLIENT_GEMINI = !!(window.LD_CONFIG && window.LD_CONFIG.ALLOW_CLIENT_GEMINI);
   async function generateClientDirect(slicedBase64, filename, from, to, ocr) {
     let key = (localStorage.getItem('ld_gemini_key') || $('geminiKeyIn')?.value || '').trim();
     if (!key) {
@@ -182,6 +183,8 @@
           page_from: from, page_to: to, ocr: ocrChecked,
         } });
       } catch (backendErr) {
+        // Σφάλματα με status (401/402/403/…) είναι απαντήσεις του server και δεν παρακάμπτονται ποτέ.
+        if (!CLIENT_GEMINI || backendErr.status) throw backendErr;
         // Fallback: Άμεση δημιουργία μέσω Client-side Gemini αν το backend είναι offline
         console.warn('Backend unavailable, switching to client-side direct Gemini generation:', backendErr.message);
 
@@ -420,7 +423,11 @@
   async function init() {
     await LD.renderHeader('study');
     
-    // Setup API Key inputs
+    // Setup API Key inputs (κρυφό και εκκαθαρισμένο εκτός demo mode)
+    if (!CLIENT_GEMINI) {
+      try { localStorage.removeItem('ld_gemini_key'); } catch {}
+      if ($('apiKeyPrompt')) $('apiKeyPrompt').remove();
+    }
     if ($('geminiKeyIn')) {
       $('geminiKeyIn').value = localStorage.getItem('ld_gemini_key') || '';
       $('saveKeyBtn').onclick = () => {
