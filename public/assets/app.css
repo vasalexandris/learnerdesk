@@ -24,6 +24,8 @@ a { color: var(--accent); }
 .site-header .brand { margin: 0; font-size: 21px; font-weight: 700; letter-spacing: -0.3px; }
 .lang-btn { margin-left: 18px; background: rgba(255,255,255,.15); color: #fff; border: 2px solid rgba(255,255,255,.6); border-radius: 6px; padding: 4px 12px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
 .lang-btn:hover { background: rgba(255,255,255,.28); }
+.lang-select { margin-left: 14px; background: rgba(255,255,255,.18); color: #fff; border: 1.5px solid rgba(255,255,255,.6); border-radius: 6px; padding: 4px 8px; font-weight: 700; font-size: 13px; cursor: pointer; outline: none; }
+.lang-select option { background: #1a1a2e; color: #fff; }
 
 /* Layout & Typography */
 .wrap { max-width: 1100px; margin: 0 auto; padding: 36px 20px; }

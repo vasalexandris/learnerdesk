@@ -4,9 +4,12 @@
   const store = { get(k) { try { return localStorage.getItem(k); } catch { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch {} } };
 
   // ---- i18n ----
-  let lang = store.get('ld_lang') || ((navigator.language || 'el').startsWith('en') ? 'en' : 'el');
+  const SUPPORTED_LANGS = ['el', 'en', 'it', 'es', 'de', 'fr'];
+  let lang = store.get('ld_lang') || ((navigator.language || 'el').slice(0, 2).toLowerCase());
+  if (!SUPPORTED_LANGS.includes(lang)) lang = 'el';
+
   const t = (key, vars) => {
-    let s = (window.LD_I18N[lang] && window.LD_I18N[lang][key]) || window.LD_I18N.el[key] || key;
+    let s = (window.LD_I18N[lang] && window.LD_I18N[lang][key]) || (window.LD_I18N.el && window.LD_I18N.el[key]) || key;
     if (vars) for (const k in vars) s = s.replace(`{${k}}`, vars[k]);
     return s;
   };
@@ -73,11 +76,23 @@
     let isAdmin = false;
     if (s && CFG && CFG.API_URL) { try { isAdmin = (await api('/me')).is_admin; } catch {} }
     const link = (page, key) => `<a href="${pageUrl(page)}" class="${active === key ? 'active' : ''}" data-i18n="nav_${key}"></a>`;
+    
+    const langs = [
+      { code: 'el', label: '🇬🇷 Ελληνικά' },
+      { code: 'en', label: '🇬🇧 English' },
+      { code: 'it', label: '🇮🇹 Italiano' },
+      { code: 'es', label: '🇪🇸 Español' },
+      { code: 'de', label: '🇩🇪 Deutsch' },
+      { code: 'fr', label: '🇫🇷 Français' }
+    ];
+    const langOpts = langs.map(l => `<option value="${l.code}" ${lang === l.code ? 'selected' : ''}>${l.label}</option>`).join('');
+
     host.innerHTML = `<header class="site-header"><a class="brand" href="${pageUrl('home')}">🎓 LearnerDesk</a><nav>
       ${link('demo', 'demo')}${link('study', 'study')}${link('dashboard', 'dashboard')}${link('pricing', 'pricing')}${isAdmin ? link('admin', 'admin') : ''}
       ${sb ? (s ? '<a href="#" id="logout" data-i18n="nav_logout"></a>' : `<a href="${pageUrl('auth')}" data-i18n="nav_login"></a>`) : '<span style="font-size:12px;opacity:0.8;padding:2px 8px;background:rgba(255,255,255,0.2);border-radius:4px;">Dev / Demo</span>'}
-      <button id="lang-btn" class="lang-btn">${t('lang_switch')}</button></nav></header>`;
-    document.getElementById('lang-btn').onclick = () => setLang(lang === 'el' ? 'en' : 'el');
+      <select id="lang-select" class="lang-select">${langOpts}</select></nav></header>`;
+    
+    document.getElementById('lang-select').onchange = e => setLang(e.target.value);
     const lo = document.getElementById('logout');
     if (lo && sb) lo.onclick = async e => { e.preventDefault(); await sb.auth.signOut(); location.href = pageUrl('home'); };
     applyI18n(host);
